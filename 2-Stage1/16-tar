@@ -1,13 +1,11 @@
 # Stage1: Tar
 # Build and install as cmlfs
 
-# if build under root user
-export FORCE_UNSAFE_CONFIGURE=1
-
 # Configure source with clang
-CC=clang \
-CXX=clang++ \
-LD=ld.lld \
+CC=clang CXX=clang++ LD=ld.lld \
+AR=llvm-ar AS=llvm-as NM=llvm-nm \
+READELF=llvm-readelf RANLIB=llvm-ranlib STRIP=llvm-strip \
+OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump \
 ./configure \
     --build=x86_64-pc-linux-musl \
     --host=x86_64-pc-linux-musl \
@@ -15,5 +13,3 @@ LD=ld.lld \
 
 # Build and install to toolchain
 make -j`nproc --all` && make install
-
-unset FORCE_UNSAFE_CONFIGURE

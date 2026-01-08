@@ -4,13 +4,8 @@
 # and final system. 
 
 # Configure source
-CC=clang \
-CXX=clang++ \
-LD=ld.lld \
 ./configure \
-    --build=x86_64-pc-linux-musl \
-    --host=x86_64-pc-linux-musl  \
-    --prefix=/llvmtools      \
+    --prefix=/llvmtools \
     --disable-libseccomp
 
 # Build and install to toolchain

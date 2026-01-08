@@ -10,12 +10,7 @@
 patch -Np1 -i ../CMLFS/patches/llvm-cmlfs/modify-toolchain-dynamic-loader.llvmtools.patch
 patch -Np1 -i ../CMLFS/patches/llvm-cmlfs/modify-test-dynamic-loader.llvmtools.patch
 
-# Restore -nostdlibc changes
-# clang we use in the following stages support stdinc
-# revert patch
-patch -Np1 -R -i ../CMLFS/patches/llvm-cmlfs/runtimes-Probe-for-nostdlib-and-nostdinc-with-the-C-.patch
-
-# - clang/lib/Driver/ToolChains/Linux.cpp: --hash-style=gnu -> --hash-style=both
+# in stage0, there is no unwind headers in /llvmtools
 # - libunwind/include/unwind.h: <__libunwind_config.h> -> "__libunwind_config.h"
 # - libunwind/include/unwind.h: <unwind_itanium.h> -> "unwind_itanium.h"
 
@@ -25,8 +20,7 @@ export CFLAGS="-fPIC -Wl,-rpath=/cgnutools/lib "
 export CXXFLAGS=$CFLAGS
 
 cmake \
-    -B build -S llvm \
-    -G "Ninja" -Wno-dev \
+    -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX="/cgnutools" \
     -DCMAKE_C_COMPILER="x86_64-pc-linux-musl-gcc" \
@@ -34,12 +28,10 @@ cmake \
     -DCMAKE_AR="/cgnutools/bin/x86_64-pc-linux-musl-ar" \
     -DCMAKE_NM="/cgnutools/bin/x86_64-pc-linux-musl-nm" \
     -DCMAKE_RANLIB="/cgnutools/bin/x86_64-pc-linux-musl-ranlib" \
-    -DCLANG_BUILD_EXAMPLES=OFF \
     -DCLANG_DEFAULT_CXX_STDLIB=libc++ \
     -DCLANG_DEFAULT_LINKER=lld \
     -DCLANG_DEFAULT_RTLIB=compiler-rt \
     -DCLANG_DEFAULT_UNWINDLIB=libunwind \
-    -DCLANG_INCLUDE_TESTS=OFF \
     -DCOMPILER_RT_BUILD_GWP_ASAN=OFF \
     -DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
     -DCOMPILER_RT_BUILD_MEMPROF=OFF \
@@ -47,59 +39,44 @@ cmake \
     -DCOMPILER_RT_BUILD_SANITIZERS=OFF \
     -DCOMPILER_RT_BUILD_XRAY=OFF \
     -DCOMPILER_RT_DEFAULT_TARGET_TRIPLE="x86_64-pc-linux-musl" \
-    -DCOMPILER_RT_INCLUDE_TESTS=OFF \
     -DCOMPILER_RT_USE_BUILTINS_LIBRARY=OFF \
     -DCOMPILER_RT_USE_LLVM_UNWINDER=ON \
     -DDEFAULT_SYSROOT="/llvmtools" \
     -DENABLE_LINKER_BUILD_ID=ON \
     -DLIBCXXABI_ENABLE_STATIC_UNWINDER=ON \
-    -DLIBCXXABI_INCLUDE_TESTS=OFF \
     -DLIBCXXABI_USE_COMPILER_RT=OFF \
     -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
     -DLIBCXX_CXX_ABI=libcxxabi \
     -DLIBCXX_ENABLE_LOCALIZATION=ON \
-    -DLIBCXX_ENABLE_NEW_DELETE_DEFINITIONS=ON \
-    -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=ON \
     -DLIBCXX_HARDENING_MODE=fast \
     -DLIBCXX_HAS_MUSL_LIBC=ON \
-    -DLIBCXX_INCLUDE_BENCHMARKS=OFF \
-    -DLIBCXX_INCLUDE_DOCS=OFF \
-    -DLIBCXX_INCLUDE_TESTS=OFF \
     -DLIBCXX_USE_COMPILER_RT=OFF \
-    -DLIBUNWIND_INCLUDE_DOCS=OFF \
-    -DLIBUNWIND_INCLUDE_TESTS=OFF \
     -DLIBUNWIND_INSTALL_HEADERS=ON \
-    -DLLVM_BUILD_BENCHMARKS=OFF \
-    -DLLVM_BUILD_DOCS=OFF \
-    -DLLVM_BUILD_EXAMPLES=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
-    -DLLVM_BUILD_UTILS=OFF \
     -DLLVM_CCACHE_BUILD=ON \
     -DLLVM_DEFAULT_TARGET_TRIPLE="x86_64-pc-linux-musl" \
-    -DLLVM_ENABLE_EH=ON \
     -DLLVM_ENABLE_LIBEDIT=OFF \
     -DLLVM_ENABLE_LIBPFM=OFF \
     -DLLVM_ENABLE_LIBXML2=OFF \
-    -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
+    -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=OFF \
     -DLLVM_ENABLE_PROJECTS="clang;lld" \
     -DLLVM_ENABLE_RTTI=ON \
     -DLLVM_ENABLE_RUNTIMES="compiler-rt;libunwind;libcxx;libcxxabi" \
     -DLLVM_ENABLE_ZLIB=ON \
     -DLLVM_ENABLE_ZSTD=OFF \
     -DLLVM_HOST_TRIPLE="x86_64-pc-linux-musl" \
-    -DLLVM_INCLUDE_BENCHMARKS=OFF \
-    -DLLVM_INCLUDE_DOCS=OFF \
-    -DLLVM_INCLUDE_EXAMPLES=OFF \
-    -DLLVM_INCLUDE_TESTS=OFF \
-    -DLLVM_INSTALL_UTILS=OFF \
     -DLLVM_LINK_LLVM_DYLIB=ON \
     -DLLVM_TARGETS_TO_BUILD="Native;host" \
-    -DLLVM_TARGET_ARCH="host"
+    -DLLVM_TARGET_ARCH="host" \
+    ../llvm
 
-# no -DLLVM_ENABLE_LLD=ON \
+# no -DLLVM_ENABLE_LLD=ON, since llvm-runtimes build cannot use lld
+# if LLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON or unset,
+# compiler-rt is installed to /cgnutools/lib/clang/21/lib/x86_64-pc-linux-musl
+# LIBCXXABI_ENABLE_STATIC_UNWINDER must be ON, otherwise stage1-build/bin/llvm-min-tblgen will miss symbol
 
 # compile
-cmake --build build
+ninja
 
 # For troubleshooting, this is the breakdown of build targets:
 # Note: Order from least to most deps not acertained yet.
@@ -116,14 +93,7 @@ ninja -C build builtins # 3 targets ................................ PASS
 ninja -C build # 570 ............................................... PASS
 
 # install to cgnutools
-cmake --install build --strip
-
-# Make LLD the default linker
-ln -sv clang-19 /cgnutools/bin/x86_64-pc-linux-musl-clang
-ln -sv clang-19 /cgnutools/bin/x86_64-pc-linux-musl-clang++
-
-# Disable cross-gcc ... will use stage0 clang instead
-mv -v /cgnutools/lib/gcc{,-disabled}
+ninja install/strip
 
 # Configure stage0 clang
 cat > /cgnutools/bin/x86_64-pc-linux-musl.cfg <<EOF
@@ -138,7 +108,7 @@ EOF
 echo "/cgnutools/lib" >> /llvmtools/etc/ld-musl-x86_64.path
 
 # Test stage0 Clang
-echo "int main() {}" > dummy.c
+echo "int main(void) {}" > dummy.c
 /cgnutools/bin/x86_64-pc-linux-musl-clang \
     dummy.c -v -Wl,--verbose &> dummy.log
 llvm-readelf -l a.out | grep ': /llvmtools'
@@ -157,23 +127,23 @@ grep ld.lld:  dummy.log
 # Should output:
 # ld.lld: /llvmtools/lib/Scrt1.o
 # ld.lld: /llvmtools/lib/crti.o
-# ld.lld: /cgnutools/lib/clang/19/lib/x86_64-pc-linux-musl/clang_rt.crtbegin.o
+# ld.lld: /cgnutools/lib/clang/21/lib/linux/clang_rt.crtbegin-x86_64.o
 # ld.lld: /tmp/dummy-ffb57c.o
-# ld.lld: /mnt/cmlfs/cgnutools/lib/clang/19/lib/x86_64-pc-linux-musl/libclang_rt.builtins.a
+# ld.lld: /cgnutools/lib/clang/21/lib/linux/libclang_rt.builtins-x86_64.a
 # ld.lld: /llvmtools/lib/libunwind.so
 # ld.lld: /llvmtools/lib/libatomic.so
 # ld.lld: /llvmtools/lib/libc.so
-# ld.lld: /cgnutools/lib/clang/19/lib/x86_64-pc-linux-musl/libclang_rt.builtins.a
+# ld.lld: /cgnutools/lib/clang/21/lib/linux/libclang_rt.builtins-x86_64.a
 # ld.lld: /llvmtools/lib/libunwind.so
-# ld.lld: /cgnutools/lib/clang/19/lib/x86_64-pc-linux-musl/clang_rt.crtend.o
+# ld.lld: /cgnutools/lib/clang/21/lib/linux/clang_rt.crtend-x86_64.o
 # ld.lld: /llvmtools/lib/crtn.o
 
 # Verify that stage0 clang is searching for the correct header files:
-grep -B2 -A1 '^ /llvmtools/usr/include' dummy.log
+grep -B2 -A1 '^ /llvmtools/include' dummy.log
 # It should output in this order:
 # /cgnutools/include/c++/v1
-# /llvmtools/usr/include
-# /cgnutools/lib/clang/19/include
+# /llvmtools/include
+# /cgnutools/lib/clang/21/include
 # NOTE: The libc++ headers should be searched first before any other header directories.
 
 # Check if stage0 clang++ [in llvmtools] has atomics.
@@ -225,3 +195,5 @@ grep error: cxx11-test.log
 
 # If all is good, remove build directory. Sourc tree will be re-used later
 rm -rf build dummy.* atomics-test.* cxx11-test.* a.out
+
+unset CFLAGS CXXFLAGS

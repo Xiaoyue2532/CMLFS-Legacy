@@ -2,12 +2,7 @@
 # Build and install under chroot
 
 # Configure source with clang
-CC=clang \
-CXX=clang++ \
-LD=ld.lld \
 ./configure \
-    --build=x86_64-pc-linux-musl \
-    --host=x86_64-pc-linux-musl \
     --prefix=/llvmtools
 
 # Build and install to toolchain

@@ -4,9 +4,10 @@
 # Use GNU Bison
 
 # Configure source
-CC=clang \
-CXX=clang++ \
-LD=ld.lld \
+CC=clang CXX=clang++ LD=ld.lld \
+AR=llvm-ar AS=llvm-as NM=llvm-nm \
+READELF=llvm-readelf RANLIB=llvm-ranlib STRIP=llvm-strip \
+OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump \
 ./configure \
     --prefix=/llvmtools \
     --build=x86_64-pc-linux-musl \

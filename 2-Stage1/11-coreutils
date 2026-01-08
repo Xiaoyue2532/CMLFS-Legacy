@@ -1,6 +1,8 @@
 # Stage1: Coreutils
 # Build and install as cmlfs
 
+# GNU Coreutils >=9.7 cannot be built
+
 # [Don't] Re-create configure script 
 # [ ... it usually fails]
 #autoreconf -vif
@@ -17,19 +19,13 @@ gl_cv_func_working_acl_get_file=yes
 EOF
 
 # Suppress a test which on some machines can loop forever:
-#sed -i '/test.lock/s/^/#/' gnulib-tests/gnulib.mk
-
-# if build under root user
-export FORCE_UNSAFE_CONFIGURE=1
+# sed -i '/test.lock/s/^/#/' gnulib-tests/gnulib.mk
 
 # Configure source with clang
-CC=clang \
-CXX=clang++ \
-AR=llvm-ar \
-AS=llvm-as \
-RANLIB=llvm-ranlib \
-LD=ld.lld \
-STRIP=llvm-strip \
+CC=clang CXX=clang++ LD=ld.lld \
+AR=llvm-ar AS=llvm-as NM=llvm-nm \
+READELF=llvm-readelf RANLIB=llvm-ranlib STRIP=llvm-strip \
+OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump \
 ./configure \
     --prefix=/llvmtools \
     --build=x86_64-pc-linux-musl \
@@ -39,5 +35,3 @@ STRIP=llvm-strip \
 
 # Build and install to toolchain
 make -j`nproc --all` && make install
-
-unset FORCE_UNSAFE_CONFIGURE

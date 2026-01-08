@@ -6,11 +6,11 @@
 # of unneeded debugging symbols. 
 
 # Optional: Remove debug symbols with: 
-find /llvmtools/bin/ -maxdepth 1 -type f -exec /llvmtools/bin/llvm-strip --strip-unneeded {} \;
+find /llvmtools/bin/ -maxdepth 1 -type f -exec /cgnutools/bin/llvm-strip --strip-all {} \;
+find /llvmtools/lib/ -maxdepth 1 -type f \( -name \*.so* -a ! -name \*dbg \) -exec /cgnutools/bin/llvm-strip --strip-unneeded {} \;
 # Most of the debug symbols were stripped when installed stage 1 LLVM
 # Otherwise, only a few megabytes are removed if all shared libraries
 # are stripped of debug symbols
-#find /llvmtools/bin/ -maxdepth 1 -type f -exec /cgnutools/bin/llvm-strip --strip-unneeded {} \;
 
 # Remove the documentation:
 rm -rf /llvmtools/{,share}/{info,man,doc}

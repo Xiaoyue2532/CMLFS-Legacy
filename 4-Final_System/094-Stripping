@@ -3,11 +3,11 @@
 
 exec /llvmtools/bin/bash
 /llvmtools/bin/find /usr/lib -type f -name \*.a \
-   -exec /llvmtools/bin/strip --strip-debug {} ';'
+   -exec /llvmtools/bin/llvm-strip --strip-debug {} ';'
 
 /llvmtools/bin/find /lib /usr/lib -type f \( -name \*.so* -a ! -name \*dbg \) \
-   -exec /llvmtools/bin/strip --strip-unneeded {} ';'
+   -exec /llvmtools/bin/llvm-strip --strip-unneeded {} ';'
 
 /llvmtools/bin/find /{bin,sbin} /usr/{bin,sbin,libexec} -type f \
-    -exec /llvmtools/bin/strip --strip-all {} ';'
+    -exec /llvmtools/bin/llvm-strip --strip-all {} ';'
 

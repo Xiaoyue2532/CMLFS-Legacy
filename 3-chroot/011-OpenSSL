@@ -2,7 +2,6 @@
 # Build & install under chroot
 
 # Configure source to install in /opt/openssl
-CC=clang CXX=clang++ \
 ./config \
     --prefix=/llvmtools \
     --openssldir=/llvmtools/etc/ssl \

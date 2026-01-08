@@ -3,11 +3,9 @@
 
 # Source is hard coded for ar. Create a link
 
-CC=clang CXX=clang++ \
-    make -j`nproc --all`
+make -j`nproc --all`
 
-CC=clang CXX=clang++ \
-    make -C contrib/pzstd -j`nproc --all`
+make -C contrib/pzstd -j`nproc --all`
 
 make prefix=/llvmtools \
     install

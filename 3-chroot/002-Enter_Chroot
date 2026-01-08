@@ -24,5 +24,14 @@ case $(uname -m) in
               export   MCA="arm" ;;
 esac
 
-# Set clang as the default C/C++ compiler
-export CC=clang CXX=clang++
+export CC=clang
+export CXX=clang++
+export LD=ld.lld
+export AR=llvm-ar
+export AS=llvm-as
+export NM=llvm-nm
+export READELF=llvm-readelf
+export RANLIB=llvm-ranlib
+export STRIP=llvm-strip
+export OBJCOPY=llvm-objcopy
+export OBJDUMP=llvm-objdump

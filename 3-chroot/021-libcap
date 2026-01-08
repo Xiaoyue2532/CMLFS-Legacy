@@ -1,3 +1,6 @@
+# Stage1: libcap 
+# Build under chroot
+
 make CC=clang -j`nproc --all`
 make CC=clang RAISE_SETFCAP=no lib=lib prefix=/llvmtools install
 chmod -v 755 /llvmtools/lib/libcap.so

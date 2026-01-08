@@ -4,18 +4,20 @@
 # Ensure gawk exist on the host
 mkdir build
 pushd build
-    CC=clang \
-    CXX=clang++ \
-    LD=ld.lld \
+    CC=clang CXX=clang++ LD=ld.lld \
+    AR=llvm-ar AS=llvm-as NM=llvm-nm \
+    READELF=llvm-readelf RANLIB=llvm-ranlib STRIP=llvm-strip \
+    OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump \
     ../configure AWK=gawk
     make -C include -j`nproc --all`
     make -C progs tic -j`nproc --all`
 popd
 
 # Build
-CC=clang \
-CXX=clang++ \
-LD=ld.lld \
+CC=clang CXX=clang++ LD=ld.lld \
+AR=llvm-ar AS=llvm-as NM=llvm-nm \
+READELF=llvm-readelf RANLIB=llvm-ranlib STRIP=llvm-strip \
+OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump \
 ./configure \
     --prefix=/llvmtools \
     --host=x86_64-pc-linux-musl \
@@ -31,14 +33,13 @@ LD=ld.lld \
 # Install to llvmtools
 make -j`nproc --all` && make TIC_PATH=$(pwd)/build/progs/tic install
 
-ln -sv libncursesw.so /llvmtools/lib/libncurses.so
-sed -e 's/^#if.*XOPEN.*$/#if 1/' \
-    -i /llvmtools/include/ncursesw/curses.h
-
 # Some packages may not configure with the curses library
 # in llvmtools. Create a compatibility links:
-ln -sv libncurses.so  /llvmtools/lib/libtinfo.so
-ln -sv libncurses.so  /llvmtools/lib/libtinfow.so
+ln -sv libncursesw.so /llvmtools/lib/libncurses.so
+ln -sv libncurses.so /llvmtools/lib/libtinfo.so
+ln -sv libncurses.so /llvmtools/lib/libtinfow.so
 
-# fix python cannot find term.h
-ln -s ncursesw/term.h /llvmtools/include/term.h
+sed -e 's/^#if.*XOPEN.*$/#if 1/' \
+    -i /llvmtools/include/ncursesw/curses.h
+mv /llvmtools/include/ncursesw/* /llvmtools/include/
+rm -r /llvmtools/include/ncursesw

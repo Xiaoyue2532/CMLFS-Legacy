@@ -24,7 +24,7 @@ https://github.com/libarchive/libarchive/releases/download/v3.8.5/libarchive-3.8
 https://github.com/libcheck/check/releases/download/0.15.2/check-0.15.2.tar.gz
 https://github.com/libexpat/libexpat/releases/download/R_2_7_1/expat-2.7.1.tar.xz
 https://github.com/libffi/libffi/releases/download/v3.5.2/libffi-3.5.2.tar.gz
-https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/llvm-project-21.1.8.src.tar.xz
+https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.8/llvm-project-20.1.8.src.tar.xz
 https://github.com/lz4/lz4/releases/download/v1.10.0/lz4-1.10.0.tar.gz
 https://github.com/mesonbuild/meson/releases/download/1.10.0/meson-1.10.0.tar.gz
 https://github.com/ninja-build/ninja/archive/v1.13.2/ninja-1.13.2.tar.gz
@@ -42,7 +42,7 @@ https://mirrors.ustc.edu.cn/gnu/autoconf/autoconf-2.72.tar.xz
 https://mirrors.ustc.edu.cn/gnu/automake/automake-1.18.1.tar.xz
 https://mirrors.ustc.edu.cn/gnu/bash/bash-5.3.tar.gz
 https://mirrors.ustc.edu.cn/gnu/bison/bison-3.8.2.tar.xz
-https://mirrors.ustc.edu.cn/gnu/coreutils/coreutils-9.9.tar.xz
+https://mirrors.ustc.edu.cn/gnu/coreutils/coreutils-9.6.tar.xz
 https://mirrors.ustc.edu.cn/gnu/diffutils/diffutils-3.12.tar.xz
 https://mirrors.ustc.edu.cn/gnu/findutils/findutils-4.10.0.tar.xz
 https://mirrors.ustc.edu.cn/gnu/gawk/gawk-5.3.2.tar.xz
@@ -55,7 +55,7 @@ https://mirrors.ustc.edu.cn/gnu/grub/grub-2.12.tar.xz
 https://mirrors.ustc.edu.cn/gnu/gzip/gzip-1.14.tar.xz
 https://mirrors.ustc.edu.cn/gnu/inetutils/inetutils-2.7.tar.xz
 https://mirrors.ustc.edu.cn/gnu/less/less-685.tar.gz
-https://mirrors.ustc.edu.cn/gnu/m4/m4-1.4.20.tar.xz
+https://mirrors.ustc.edu.cn/gnu/m4/m4-1.4.19.tar.xz
 https://mirrors.ustc.edu.cn/gnu/make/make-4.4.1.tar.gz
 https://mirrors.ustc.edu.cn/gnu/nano/nano-8.7.tar.xz
 https://mirrors.ustc.edu.cn/gnu/patch/patch-2.8.tar.xz

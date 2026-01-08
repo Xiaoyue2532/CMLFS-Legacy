@@ -9,10 +9,10 @@ make mrproper
 make ARCH=x86_64 headers
 
 # Install the headers for stage 0 clang
-find usr/include -type f ! -name '*.h' -delete
-sudo mkdir -pv /llvmtools/include && sudo chown -R arch:arch /llvmtools
+sudo chown -R 1000:1000 /llvmtools
+mkdir -pv /llvmtools/include
 cp -rv usr/include/* /llvmtools/include/
-rm -v /llvmtools/include/Makefile
+find /llvmtools/include -type f ! -name '*.h' -delete
 
 # Clean the source
 make mrproper

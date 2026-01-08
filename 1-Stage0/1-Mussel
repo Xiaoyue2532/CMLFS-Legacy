@@ -15,23 +15,12 @@ cd mussel
 # MSYSROOT="/cgnutools"
 patch -Np1 -i ../patches/mussel-change-variables.patch
 
-# Modify ./mussel to add a vendor in target tuple
-# Set vendor as 'pc'. If omitted, clang defaults to 'unknown'
-patch -Np1 -i ../patches/mussel-add-vendor.patch
-
 # Apply patch to add compatibility links for cross AR and RANLIB
 patch -Np1 -i ../patches/mussel-add-missing-symlinks.patch
 
-# If compiling with LLVM, prefix commands with LLVM=1 
-# to build kernel headers
-patch -Np1 -i ../patches/mussel-LLVM_for_headers.patch
-
 # Build toolchain. Amend PATH to include /cgnutools/bin
 # o Omit -p if not building in parallel to use all the host's CPU cores
-
-# may use gcc-15.1.1
-# refer to https://gitlab.archlinux.org/archlinux/packaging/packages/gcc/
-sudo PATH=/cgnutools/bin:$PATH ./mussel x86_64 -l -o -k -p -g
+sudo PATH=“/cgnutools/bin:$PATH“ ./mussel x86_64 -l -o -k -p -g -T 'pc'
 
 # Make sure cgnutools is owned by cmlfs
 sudo chown -vR cmlfs $CMLFS/cgnutools
@@ -46,13 +35,11 @@ rm -rfv /cgnutools/share/{man,info}
 # cgnutools.
 # This will be reached by creating a modified specs file in the
 # proper location:
-# export MCGV=$(/cgnutools/bin/x86_64-pc-linux-musl-gcc --version | sed 1q | cut -d' ' -f3- )
-export MCGV=15.1.1
+export MCGV=$(/cgnutools/bin/x86_64-pc-linux-musl-gcc --version | sed 1q | cut -d' ' -f3- )
 /cgnutools/bin/x86_64-pc-linux-musl-gcc -dumpspecs | sed 's/\/lib\/ld-musl/\/llvmtools\/lib\/ld-musl/g' > /cgnutools/lib/gcc/x86_64-pc-linux-musl/$MCGV/specs
 
 # Test the _tools toolchain:
-cd $CMLFS/sources
-printf "#include <stdio.h>\nint main(){}\n" > dummy.c
+printf "#include <stdio.h>\nint main(void){}\n" > dummy.c
 /cgnutools/bin/x86_64-pc-linux-musl-gcc dummy.c
 readelf -l a.out | grep ld
 

@@ -9,6 +9,8 @@
 
 # Buid and install
 make -j`nproc --all` && make DESTDIR=/llvmtools install
+# musl sometimes don't install headers, if recompile do not make changes
+# you may need to reinstall some header files manually
 
 # Fix a symlink, which may cause "Permission Denied"
 rm -v /llvmtools/lib/ld-musl-x86_64.so.1
@@ -42,14 +44,11 @@ EOF
 # cgnutools.
 # This will be reached by creating a modified  specs  file in the
 # proper location:
-
-# export MCGV=$(/cgnutools/bin/x86_64-pc-linux-musl-gcc --version | sed 1q | cut -d' ' -f3- )
-export MCGV=15.1.1
+export MCGV=$(/cgnutools/bin/x86_64-pc-linux-musl-gcc --version | sed 1q | cut -d' ' -f3- )
 /cgnutools/bin/x86_64-pc-linux-musl-gcc -dumpspecs | sed 's/\/lib\/ld-musl/\/llvmtools\/lib\/ld-musl/g' > /cgnutools/lib/gcc/x86_64-pc-linux-musl/$MCGV/specs
 
 # Test the _tools toolchain:
-cd $CMLFS/sources
-printf "#include <stdio.h>\nint main(){}\n" > dummy.c
+printf "#include <stdio.h>\nint main(void){}\n" > dummy.c
 x86_64-pc-linux-musl-gcc dummy.c
 readelf -l a.out | grep ld
 

@@ -5,26 +5,17 @@
 find ../../cports/main/python/patches/ -type f -exec patch -Np1 -i {} \;
 
 # Configure source with clang
-# enable free-thread
-CC=clang \
-CXX=clang++ \
-AR=llvm-ar \
-AS=llvm-as \
-RANLIB=llvm-ranlib \
-LD=ld.lld \
-STRIP=llvm-strip \
 ./configure \
     --build=x86_64-pc-linux-musl \
     --host=x86_64-pc-linux-musl \
     --prefix=/llvmtools \
     --enable-shared \
-    --disable-gil \
     --with-ensurepip
 
 # Build and install to toolchain
 make -j`nproc --all` && make install
 
-chmod -v 755 /llvmtools/lib/libpython3.13t.so &&
+chmod -v 755 /llvmtools/lib/libpython3.13.so &&
 chmod -v 755 /llvmtools/lib/libpython3.so 
 
 ln -sv python3 /llvmtools/bin/python

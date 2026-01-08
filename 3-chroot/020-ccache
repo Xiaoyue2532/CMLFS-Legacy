@@ -1,11 +1,10 @@
 # Stage1: ccache 
 # Build under chroot
-# Optional package: Text editor for convenience or trouble shooting
 
 mkdir build && cd build
 
 cmake \
-    -G Ninja -Wno-dev \
+    -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/llvmtools \
     -DCMAKE_INSTALL_SYSCONFDIR=/llvmtools/etc \

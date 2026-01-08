@@ -1,5 +1,6 @@
-CC=clang \
-LD=ld.lld \
+# Stage1: fakeroot
+# Build under chroot
+
 ./configure \
     --prefix=/llvmtools \
     --libdir=/llvmtools/lib/libfakeroot \

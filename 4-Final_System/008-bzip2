@@ -18,7 +18,7 @@ sed -i -e "s:1\.0\.4:1.0.8:" \
        bzip2.1 bzip2.txt Makefile-libbz2_so manual.*
 
 # Some packages will require bzip2 compiled with -fPIC
-export CFLAGS="-fPIC"
+export CFLAGS="-fPIC "
 
 # Makefile hardcoded for gcc. Force it to use stage1 clang via $CC
 sed -i '18d' Makefile

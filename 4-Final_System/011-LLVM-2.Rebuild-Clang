@@ -11,7 +11,7 @@ export CXXFLAGS=$CFLAGS
 # Configure source to enable only the clang project:
 cmake \
     -S llvm -B build \
-    -G Ninja -Wno-dev \
+    -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DCLANG_DEFAULT_CXX_STDLIB=libc++ \
@@ -25,7 +25,6 @@ cmake \
     -DLLVM_BUILD_TOOLS=OFF \
     -DLLVM_BUILD_UTILS=OFF \
     -DLLVM_DEFAULT_TARGET_TRIPLE="x86_64-pc-linux-musl" \
-    -DLLVM_ENABLE_EH=ON \
     -DLLVM_ENABLE_OCAMLDOC=OFF \
     -DLLVM_ENABLE_PROJECTS=clang \
     -DLLVM_ENABLE_RTTI=ON \
@@ -64,7 +63,7 @@ export VBUILD=/sources/VBUILD
 mkdir $VBUILD
 mkdir -pv $VBUILD/CLANG/usr/{bin,lib,include,share}
 mkdir -pv $VBUILD/CLANG/usr/lib/cmake
-mkdir -pv $VBUILD/CLANG/usr/lib/clang/19
+mkdir -pv $VBUILD/CLANG/usr/lib/clang/20
 
 mv -v $BUILD/usr/bin/*clang* $VBUILD/CLANG/usr/bin/
 mv -v $BUILD/usr/bin/c-index-test $VBUILD/CLANG/usr/bin/
@@ -73,7 +72,7 @@ mv -v $BUILD/usr/bin/cc $VBUILD/CLANG/usr/bin/
 
 mv -v $BUILD/usr/include/clang $VBUILD/CLANG/usr/include/
 mv -v $BUILD/usr/include/clang-c $VBUILD/CLANG/usr/include/
-mv -v $BUILD/usr/lib/clang/19/include $VBUILD/CLANG/usr/lib/clang/19/
+mv -v $BUILD/usr/lib/clang/21/include $VBUILD/CLANG/usr/lib/clang/21/
 mv -v $BUILD/usr/lib/cmake/clang $VBUILD/CLANG/usr/lib/cmake/
 mv -v $BUILD/usr/lib/libclang*.a $VBUILD/CLANG/usr/lib/
 mv -v $BUILD/usr/lib/libclang*.so $VBUILD/CLANG/usr/lib/
@@ -107,7 +106,7 @@ grep -B1 -A1 '^ /usr' dummy.log
 # #include <...> search starts here:
 #  /usr/local/include
 #  /usr/include
-#  /usr/lib/clang/19/include
+#  /usr/lib/clang/21/include
 # End of search list.
 
 # Make sure no libraries are loaded from llvmtools
@@ -115,15 +114,15 @@ grep ld.lld:  dummy.log
 # It should output:
 # ld.lld: /lib/Scrt1.o
 # ld.lld: /lib/crti.o
-# ld.lld: /usr/lib/clang/19/lib/x86_64-pc-linux-musl/clang_rt.crtbegin.o
+# ld.lld: /usr/lib/clang/21/lib/linux/clang_rt.crtbegin-x86_64.o
 # ld.lld: /tmp/dummy-b69998.o
-# ld.lld: /usr/lib/clang/19/lib/x86_64-pc-linux-musl/libclang_rt.builtins.a
+# ld.lld: /usr/lib/clang/21/lib/linux/libclang_rt.builtins-x86_64.a
 # ld.lld: /lib/libunwind.so
 # ld.lld: /lib/libatomic.so
 # ld.lld: /lib/libc.so
-# ld.lld: /usr/lib/clang/19/lib/x86_64-pc-linux-musl/libclang_rt.builtins.a
+# ld.lld: /usr/lib/clang/21/lib/linux/libclang_rt.builtins-x86_64.a
 # ld.lld: /lib/libunwind.so
-# ld.lld: /usr/lib/clang/19/lib/x86_64-pc-linux-musl/clang_rt.crtend.o
+# ld.lld: /usr/lib/clang/21/lib/linux/clang_rt.crtend-x86_64.o
 # ld.lld: /lib/crtn.o
 
 # Check if stage2 clang++ supports atomics.
@@ -153,7 +152,7 @@ grep -B4 -A1 '^ /usr/lib' atomics-test.log
 #  /usr/bin/../include/c++/v1
 #  /usr/local/include
 #  /usr/include
-#  /usr/lib/clang/19/include
+#  /usr/lib/clang/21/include
 # End of search list.
 
 # Test if stage1 clang supports C++11

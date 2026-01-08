@@ -4,28 +4,35 @@
 # o Reuse llvm-project source tree from before
 
 # no need to revert unwind.h
-# must not use export CFLAGS="-fPIC -Wl,-rpath=/cgnutools/lib"
+# MUST NOT use export CFLAGS="-fPIC -Wl,-rpath=/cgnutools/lib"
 # or /cgnutools/lib/libLLVM.so will prior to build/lib/libLLVM.so
-# which cause runtime build failure
-export CFLAGS="-fPIC"
+# which cause llvm-runtime build failure
+
+# currently -fPIC is not necessary
+# export CFLAGS="-fPIC "
+
+# optional harden flags
+# chimeralinux patch set -fstack-protector-strong as default
+# openharmony fortify only supports clang
+export CFLAGS="-D_FORTIFY_SOURCE=2 -fstack-clash-protection -fcf-protection "
 export CXXFLAGS=$CFLAGS
 
+# Release mode use O3 as default
 cmake \
-    -B build -S llvm \
-    -G "Ninja" -Wno-dev \
+    -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX="/llvmtools" \
-    -DCMAKE_C_COMPILER="x86_64-pc-linux-musl-clang" \
-    -DCMAKE_CXX_COMPILER="x86_64-pc-linux-musl-clang++" \
+    -DCMAKE_C_FLAGS_RELEASE="-O2 -pipe" \
+    -DCMAKE_CXX_FLAGS_RELEASE="-O2 -pipe" \
+    -DCMAKE_C_COMPILER="clang" \
+    -DCMAKE_CXX_COMPILER="clang++" \
     -DCMAKE_AR="/cgnutools/bin/llvm-ar" \
     -DCMAKE_NM="/cgnutools/bin/llvm-nm" \
     -DCMAKE_RANLIB="/cgnutools/bin/llvm-ranlib" \
-    -DCLANG_BUILD_EXAMPLES=OFF \
     -DCLANG_DEFAULT_CXX_STDLIB=libc++ \
     -DCLANG_DEFAULT_LINKER=lld \
     -DCLANG_DEFAULT_RTLIB=compiler-rt \
     -DCLANG_DEFAULT_UNWINDLIB=libunwind \
-    -DCLANG_INCLUDE_TESTS=OFF \
     -DCOMPILER_RT_BUILD_GWP_ASAN=OFF \
     -DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
     -DCOMPILER_RT_BUILD_MEMPROF=OFF \
@@ -34,61 +41,44 @@ cmake \
     -DCOMPILER_RT_BUILD_XRAY=OFF \
     -DCOMPILER_RT_CXX_LIBRARY=libcxx \
     -DCOMPILER_RT_DEFAULT_TARGET_TRIPLE="x86_64-pc-linux-musl" \
-    -DCOMPILER_RT_INCLUDE_TESTS=OFF \
     -DCOMPILER_RT_USE_BUILTINS_LIBRARY=ON \
     -DCOMPILER_RT_USE_LLVM_UNWINDER=ON \
     -DDEFAULT_SYSROOT="/llvmtools" \
     -DENABLE_LINKER_BUILD_ID=ON \
-    -DLIBCXXABI_ENABLE_STATIC_UNWINDER=OFF \
-    -DLIBCXXABI_INCLUDE_TESTS=OFF \
+    -DLIBCXXABI_ENABLE_STATIC_UNWINDER=ON \
     -DLIBCXXABI_USE_COMPILER_RT=ON \
     -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
     -DLIBCXX_CXX_ABI=libcxxabi \
-    -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=OFF \
     -DLIBCXX_HARDENING_MODE=fast \
     -DLIBCXX_HAS_MUSL_LIBC=ON \
-    -DLIBCXX_INCLUDE_BENCHMARKS=OFF \
-    -DLIBCXX_INCLUDE_DOCS=OFF \
-    -DLIBCXX_INCLUDE_TESTS=OFF \
     -DLIBCXX_USE_COMPILER_RT=ON \
-    -DLIBUNWIND_INCLUDE_DOCS=OFF \
-    -DLIBUNWIND_INCLUDE_TESTS=OFF \
     -DLIBUNWIND_USE_COMPILER_RT=ON \
-    -DLLVM_BUILD_BENCHMARKS=OFF \
-    -DLLVM_BUILD_DOCS=OFF \
-    -DLLVM_BUILD_EXAMPLES=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
-    -DLLVM_BUILD_UTILS=OFF \
     -DLLVM_CCACHE_BUILD=ON \
     -DLLVM_DEFAULT_TARGET_TRIPLE="x86_64-pc-linux-musl" \
-    -DLLVM_ENABLE_EH=ON \
-    -DLLVM_ENABLE_LIBCXX=ON \
     -DLLVM_ENABLE_LIBEDIT=OFF \
     -DLLVM_ENABLE_LIBPFM=OFF \
     -DLLVM_ENABLE_LIBXML2=OFF \
     -DLLVM_ENABLE_LLD=ON \
-    -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
+    -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=OFF \
     -DLLVM_ENABLE_PROJECTS="clang;lld" \
     -DLLVM_ENABLE_RTTI=ON \
     -DLLVM_ENABLE_RUNTIMES="compiler-rt;libunwind;libcxx;libcxxabi" \
     -DLLVM_ENABLE_ZLIB=ON \
     -DLLVM_ENABLE_ZSTD=OFF \
     -DLLVM_HOST_TRIPLE="x86_64-pc-linux-musl" \
-    -DLLVM_INCLUDE_BENCHMARKS=OFF \
-    -DLLVM_INCLUDE_DOCS=OFF \
-    -DLLVM_INCLUDE_EXAMPLES=OFF \
-    -DLLVM_INCLUDE_TESTS=OFF \
-    -DLLVM_INSTALL_BINUTILS_SYMLINKS=ON \
-    -DLLVM_INSTALL_CCTOOLS_SYMLINKS=ON \
-    -DLLVM_INSTALL_UTILS=OFF \
     -DLLVM_LINK_LLVM_DYLIB=ON \
     -DLLVM_TARGETS_TO_BUILD="Native;host" \
     -DLLVM_TARGET_ARCH="host" \
     -DZLIB_INCLUDE_DIR="/llvmtools/include" \
-    -DZLIB_LIBRARY_RELEASE="/llvmtools/lib/libz.so"
+    -DZLIB_LIBRARY_RELEASE="/llvmtools/lib/libz.so" \
+    ../llvm
+
+# no need to worry LLVM_ENABLE_LLD and LIBCXXABI_ENABLE_STATIC_UNWINDER
+# STATIC_UNWINDER is not necessary
 
 # compile
-cmake --build build
+ninja
 
 # For troubleshooting, this is the breakdown of build targets:
 ninja -C build llvm-headers # 202 targets .................. PASS
@@ -105,21 +95,17 @@ ninja -C build libclang # .... 31 .......................... PASS
 ninja -C build # ............ 508 .......................... PASS
 
 # install to llvmtools
-cmake --install build --strip
-
-# Make LLD the default linker
-ln -sv clang-19 /llvmtools/bin/x86_64-pc-linux-musl-clang
-ln -sv clang-19 /llvmtools/bin/x86_64-pc-linux-musl-clang++
+ninja install/strip
 
 # Clear variables used in the CMake invocation:
 unset CFLAGS CXXFLAGS
 
 # cgnutools has served it's purpose. Remove from $PATH
-export PATH=/llvmtools/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin
+export PATH="/llvmtools/bin:$PATH"
 
 # Test stage1 Clang
-echo "int main() {}" > dummy.c
-/llvmtools/bin/x86_64-pc-linux-musl-clang \
+echo "int main(void) {}" > dummy.c
+/llvmtools/bin/clang \
     dummy.c -v -Wl,--verbose &> dummy.log
 llvm-readelf -l a.out | grep ': /llvmtools'
 # Shoud output:
@@ -136,23 +122,23 @@ grep  'crt[1in]' dummy.log | grep ld.lld:
 grep -B1 -A2 '^ /llvmtools' dummy.log
 # It should output:
 # #include <...> search starts here:
-#  /llvmtools/usr/include
-#  /llvmtools/lib/clang/19/include
+#  /llvmtools/include
+#  /llvmtools/lib/clang/21/include
 # End of search list.
 
 # Make sure no libraries are loaded from the host or cgnutools
 grep ld.lld:  dummy.log
 # ld.lld: /llvmtools/lib/Scrt1.o
 # ld.lld: /llvmtools/lib/crti.o
-# ld.lld: /llvmtools/lib/clang/19/lib/x86_64-pc-linux-musl/clang_rt.crtbegin.o
+# ld.lld: /llvmtools/lib/clang/21/lib/linux/clang_rt.crtbegin-x86_64.o
 # ld.lld: /tmp/dummy-35ed76.o
-# ld.lld: /llvmtools/lib/clang/19/lib/x86_64-pc-linux-musl/libclang_rt.builtins.a
+# ld.lld: /llvmtools/lib/clang/21/lib/linux/libclang_rt.builtins-x86_64.a
 # ld.lld: /llvmtools/lib/libunwind.so
 # ld.lld: /llvmtools/lib/libatomic.so
 # ld.lld: /llvmtools/lib/libc.so
-# ld.lld: /llvmtools/lib/clang/19/lib/x86_64-pc-linux-musl/libclang_rt.builtins.a
+# ld.lld: /llvmtools/lib/clang/21/lib/linux/libclang_rt.builtins-x86_64.a
 # ld.lld: /llvmtools/lib/libunwind.so
-# ld.lld: /llvmtools/lib/clang/19/lib/x86_64-pc-linux-musl/clang_rt.crtend.o
+# ld.lld: /llvmtools/lib/clang/21/lib/linux/clang_rt.crtend-x86_64.o
 # ld.lld: /llvmtools/lib/crtn.o
 
 # Check if stage1 clang++ [in llvmtools] has atomics.
@@ -168,7 +154,7 @@ int main() {
 }
 EOF
 
-/llvmtools/bin/x86_64-pc-linux-musl-clang++ \
+/llvmtools/bin/clang++ \
     atomics-test.cpp -v -Wl,--verbose &> atomics-test.log
 
 # Check for errors during compile or link:
@@ -181,7 +167,7 @@ grep -B2 -A2 '^ /llvmtools' atomics-test.log
 # #include <...> search starts here:
 #  /llvmtools/bin/../include/c++/v1
 #  /llvmtools/usr/include
-#  /llvmtools/lib/clang/19/include
+#  /llvmtools/lib/clang/21/include
 # End of search list.
 # NOTE: /llvmtools/include/c++/v1 should be searched first.
 
@@ -202,7 +188,7 @@ int main() {
 }
 EOF
 
-/llvmtools/bin/x86_64-pc-linux-musl-clang++ \
+/llvmtools/bin/clang++ \
     cxx11-test.cpp -v -Wl,--verbose &> cxx11-test.log
 
 # Check for errors during compile or link:
@@ -217,14 +203,13 @@ llvm-readelf -d /llvmtools/lib/libunwind.so.1.0 | grep Shared | cut -b 37-
 # Shared library: [libc.so]
 llvm-readelf -d /llvmtools/lib/libc++.so.1.0 | grep Shared | cut -b 37-
 # Shared library: [libc++abi.so.1]
-# Shared library: [libunwind.so.1]
 # Shared library: [libc.so]
 llvm-readelf -d /llvmtools/lib/libc++abi.so.1.0 | grep Shared | cut -b 37-
 # Shared library: [libc.so]
-# Shared library: [libunwind.so.1]
-llvm-readelf -d /llvmtools/lib/libLLVM.so.19.1 | grep Shared | cut -b 37-
+llvm-readelf -d /llvmtools/lib/libLLVM.so.20.1 | grep Shared | cut -b 37-
 # Shared library: [libz.so.1]
 # Shared library: [libc++.so.1]
+# Shared library: [libc++abi.so.1]
 # Shared library: [libc.so]
 
 # If all is well, clean up

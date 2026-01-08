@@ -1,9 +1,7 @@
-CC=clang \
-CXX=clang++ \
-LD=ld.lld \
+# Stage1: pkgconf 
+# Build under chroot
+
 ./configure \
-    --prefix=/llvmtools \
-    --build=x86_64-pc-linux-musl \
-    --host=x86_64-pc-linux-musl
+    --prefix=/llvmtools
 
 make -j`nproc --all` && make install
